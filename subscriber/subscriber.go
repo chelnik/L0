@@ -3,11 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/nats-io/stan.go"
+	"html/template"
+	"log"
 	"net/http"
 )
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("hello po"))
+	html, err := template.ParseFiles("../index.html")
+	if err != nil {
+		log.Println(err)
+	}
+	err = html.Execute(w, nil)
 }
 func main() {
 	mux := http.NewServeMux()

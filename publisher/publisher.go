@@ -12,7 +12,8 @@ func main() {
 		fmt.Println(err)
 	}
 	for i := 0; i < 100; i++ {
-		sc.Publish("foo", []byte("hello vadim"))
+		stringForByte := fmt.Sprintf("%s %d", "boba", i)
+		sc.Publish("foo", []byte(stringForByte))
 		time.Sleep(1000 * time.Millisecond)
 	}
 }
