@@ -4,6 +4,7 @@ import (
 	model "awesomeProject"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/nats-io/stan.go"
@@ -31,7 +32,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 func checkError(err error) {
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 }
 func main() {
@@ -39,17 +40,34 @@ func main() {
 	checkError(err)
 	// при загрузке приложения мы сразу берем данные из базы и закидываем их в мапу
 	cache, err := mapFilling(database)
-	checkError(err)
-
+	if err != nil {
+		log.Println(err)
+	}
 	dbStruct := &data{
 		database: database,
 		cache:    cache,
 	}
 	_ = dbStruct
-	// создаем мультиплексер
+	// создаем мультиплексор
 	mux := http.NewServeMux()
 	// обрабатываем путь
 	mux.HandleFunc("/", viewHandler)
+	mux.HandleFunc("/getJson", func(w http.ResponseWriter, r *http.Request) {
+		//var value []byte
+		signature := r.FormValue("signature")
+		//w.Write([]byte(signature))
+		//value, err = json.Marshal(dbStruct.cache[signature])
+		//if err != nil {
+		//	fmt.Println(err)
+		//}
+		html, err := template.ParseFiles("../viewJson.html")
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = html.Execute(w, dbStruct.cache[signature])
+		//w.Write(value)
+
+	})
 	// Подписка на канал
 	sc, err := stan.Connect("test-cluster", "subscriber")
 	checkError(err)
@@ -75,13 +93,15 @@ func (dbStruct *data) processingDataFromNats(message *stan.Msg) {
 	if dbStruct.cache[temp.Order_uid].Order_uid != "" {
 		fmt.Println("данный uid уже существует")
 		fmt.Println(dbStruct.cache[temp.Order_uid].Order_uid)
-		fmt.Println(dbStruct.cache[temp.Order_uid])
 		return
 	}
 
 	dbStruct.cache[temp.Order_uid] = temp
 	_, err = dbStruct.database.Exec("INSERT INTO orders (Order_uid, DataJson)VALUES ($1, $2)", temp.Order_uid, message.Data)
-	checkError(err)
+	fmt.Printf("Добавил %s в кэш и базу из publisher\n", temp.Order_uid)
+	if err != nil {
+		log.Println(err, "error nats")
+	}
 }
 
 // Открывает базу данных
@@ -95,17 +115,25 @@ func openDataBase() (*sql.DB, error) {
 	}
 	return database, nil
 }
+
+// Заполняет кэш из базы данных
 func mapFilling(database *sql.DB) (map[string]model.Model, error) {
 	var key string
 	var value model.Model
+	var sliceForJson []byte
 	var mapa map[string]model.Model = make(map[string]model.Model)
 	rows, err := database.Query("SELECT * FROM orders")
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("%s scan", err))
+	}
 	for rows.Next() {
-		err = rows.Scan(key, value)
+		err = rows.Scan(&key, &sliceForJson)
 		if err != nil {
-			return nil, err
+			return nil, errors.New(fmt.Sprintf("%s mapFilling", err))
 		}
+		json.Unmarshal(sliceForJson, &value)
 		mapa[key] = value
+		fmt.Printf("Добавил %s в кэш из базы\n", key)
 	}
 	return mapa, nil
 }

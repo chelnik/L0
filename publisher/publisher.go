@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	models := []string{"../model.json"}
+	models := []string{"../model.json", "../model_1.json"}
 	sc, err := stan.Connect("test-cluster", "publisher")
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +30,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Printf("%s %s is gone", "the file ", str)
+			fmt.Printf("%s %s is gone\n", "the file ", str)
 		}
 	}
 }
