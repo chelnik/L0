@@ -3,17 +3,34 @@ package main
 import (
 	"fmt"
 	"github.com/nats-io/stan.go"
-	"time"
+	"io/ioutil"
+	"log"
 )
 
 func main() {
+
+	models := []string{"../model.json"}
 	sc, err := stan.Connect("test-cluster", "publisher")
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-	for i := 0; i < 100; i++ {
-		stringForByte := fmt.Sprintf("%s %d", "boba", i)
-		sc.Publish("foo", []byte(stringForByte))
-		time.Sleep(1000 * time.Millisecond)
+	defer sc.Close()
+	for i := 0; i < 10; i++ {
+		//stringForByte := fmt.Sprintf("%d", i)
+		//sc.Publish("chanel", []byte(stringForByte))
+		//time.Sleep(100 * time.Millisecond)
+	}
+	for _, str := range models {
+		file, err := ioutil.ReadFile(str)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		err = sc.Publish("chanel", file)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Printf("%s %s is gone", "the file ", str)
+		}
 	}
 }
