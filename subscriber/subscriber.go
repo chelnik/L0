@@ -53,19 +53,21 @@ func main() {
 	// обрабатываем путь
 	mux.HandleFunc("/", viewHandler)
 	mux.HandleFunc("/getJson", func(w http.ResponseWriter, r *http.Request) {
-		//var value []byte
 		signature := r.FormValue("signature")
-		//w.Write([]byte(signature))
-		//value, err = json.Marshal(dbStruct.cache[signature])
-		//if err != nil {
-		//	fmt.Println(err)
-		//}
-		html, err := template.ParseFiles("../viewJson.html")
-		if err != nil {
-			fmt.Println(err)
+		if dbStruct.cache[signature].Order_uid == signature && signature != "" {
+			html, err := template.ParseFiles("../viewJson.html")
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = html.Execute(w, dbStruct.cache[signature])
+			fmt.Println(dbStruct.cache[signature].Order_uid, dbStruct.cache[signature].Order_uid)
+		} else {
+			_, err = w.Write([]byte("NOT FOUND\nPlease enter a valid key"))
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(dbStruct.cache[signature].Order_uid, dbStruct.cache[signature].Order_uid)
 		}
-		err = html.Execute(w, dbStruct.cache[signature])
-		//w.Write(value)
 
 	})
 	// Подписка на канал
