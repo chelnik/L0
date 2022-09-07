@@ -8,13 +8,7 @@ import (
 )
 
 func main() {
-
-	models := []string{"../model.json",
-		"../model_1.json",
-		"../model_2.json",
-		"../model_3.json",
-		"../model_error.json",
-		"../model_error_2.json"}
+	models := parseDirectory()
 	sc, err := stan.Connect("test-cluster", "publisher")
 	if err != nil {
 		log.Fatal(err)
@@ -33,4 +27,17 @@ func main() {
 			fmt.Printf("%s %s is gone\n", "the file ", str)
 		}
 	}
+}
+
+// Достает названия файлов из директории
+func parseDirectory() (models []string) {
+	path := "/Users/corkiudy/L0/models/"
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		models = append(models, path+f.Name())
+	}
+	return
 }

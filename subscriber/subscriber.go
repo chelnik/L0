@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 )
 
 type data struct {
