@@ -31,7 +31,8 @@ func main() {
 
 // Достает названия файлов из директории
 func parseDirectory() (models []string) {
-	path := "/Users/corkiudy/L0/models/"
+	//getPath()
+	path := "/Users/vadimcelnik/go/L0/models/"
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		log.Fatal(err)
@@ -41,3 +42,13 @@ func parseDirectory() (models []string) {
 	}
 	return
 }
+
+//// получает путь из местонахождения нашей директории
+//func getPath() string {
+//	mydir, err := os.Getwd()
+//	if err != nil {
+//		fmt.Println(err)
+//	}
+//	fmt.Println(mydir[:15])
+//	return mydir
+//}

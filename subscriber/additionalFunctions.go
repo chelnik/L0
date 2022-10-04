@@ -14,7 +14,7 @@ import (
 
 // Открывает базу данных
 func openDataBase() (*sql.DB, error) {
-	database, err := sql.Open("postgres", "postgresql://corkiudy:test@127.0.0.1:5432/wildberries?sslmode=disable")
+	database, err := sql.Open("postgres", "postgresql://vadimcelnik:test@127.0.0.1:5433/postgres?sslmode=disable")
 	if err != nil {
 		return nil, err
 	}
