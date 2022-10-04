@@ -22,6 +22,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	err = html.Execute(w, nil)
 }
 
