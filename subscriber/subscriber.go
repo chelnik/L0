@@ -45,6 +45,7 @@ func main() {
 	_ = dbStruct
 	// создаем мультиплексор
 	mux := http.NewServeMux()
+
 	// обрабатываем пути
 	mux.HandleFunc("/", viewHandler)
 	mux.HandleFunc("/getJson", dbStruct.getJsonHandler)
